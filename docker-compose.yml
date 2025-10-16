@@ -52,21 +52,38 @@ services:
       - etcd
       - minio
 
-
   # --- Custom Application Services ---
   ingestion_service:
     build: ./modules/ingestion_service
+    volumes:
+      - ./data:/app/data # Mount local data folder for processing
     environment:
       - RABBITMQ_HOST=rabbitmq
+      - MILVUS_HOST=milvus
       - RABBITMQ_USER=user
       - RABBITMQ_PASS=password
-      - MILVUS_HOST=milvus
       - MINIO_HOST=minio:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadmin
     depends_on:
       - rabbitmq
       - milvus
+
+  ui_service:
+    build: ./modules/ui_service
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./data:/app/data # Share the data volume
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=user
+      - RABBITMQ_PASS=password
+      - MINIO_HOST=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    depends_on:
+      - rabbitmq
       - minio
 
 volumes:
