@@ -3,5 +3,5 @@ langchain
 sentence-transformers==2.2.2
 pymilvus
 transformers==4.30.2
-huggingface-hub==0.10.1
+huggingface-hub==0.14.1
 minio
