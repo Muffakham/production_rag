@@ -1,17 +1,23 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12
+FROM python:3.9-slim
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements file into the container at /app
-COPY requirements.txt .
+# Upgrade pip
+RUN pip install --upgrade pip
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# This is the crucial step: Create the package structure inside the container
+# and copy the application code into the correct sub-directory.
+COPY . /app/modules/ingestion_service/
 
-# Copy the rest of the application code into the container at /app
-COPY . .
+# Create the __init__.py file in the parent `modules` directory to make it a package
+RUN touch /app/modules/__init__.py
 
-# Command to run the application
-CMD ["python", "main.py"]
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r /app/modules/ingestion_service/requirements.txt
+
+# Command to run the application as a module from the WORKDIR (/app).
+# This tells Python to look for a package named `modules`,
+# then a sub-package `ingestion_service`, and run its `main` module.
+CMD ["python", "-m", "modules.ingestion_service.main"]
